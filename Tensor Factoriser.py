@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import math
 import pandas as pd
+import spacy
+from gensim.models import Word2Vec
 class TensorConverter:
     def __init__(self, a, b, c, d, theta):
         self.a = a
@@ -48,6 +50,42 @@ class TensorConverter:
         d = (A[1, 1].imag ** 2).item()
         theta = math.atan2(tensor[1][1, 0].real, tensor[1][0, 0].real)
         return a*2, b*2, c, d, theta
+
+class WordVectorizer:
+    def __init__(self, model_path=None):
+        self.nlp = spacy.load('en_core_web_sm')
+        if model_path:
+            self.model = Word2Vec.load(model_path)
+        else:
+            self.model = None
+
+    def lemmatize(self, text):
+        doc = self.nlp(text)
+        return [token.lemma_ for token in doc if token.is_alpha]
+
+    def train_word2vec(self, sentences, vector_size=100, window=5, min_count=1, epochs=10):
+        tokenized_sentences = [self.lemmatize(sentence) for sentence in sentences]
+        self.model = Word2Vec(sentences=tokenized_sentences, vector_size=vector_size, window=window, min_count=min_count, workers=4)
+        self.model.train(tokenized_sentences, total_examples=len(tokenized_sentences), epochs=epochs)
+
+    def get_word_vector(self, word):
+        lemma = self.lemmatize(word)[0]
+        if self.model and lemma in self.model.wv:
+            return self.model.wv[lemma]
+        else:
+            raise ValueError(f"Word '{lemma}' not in vocabulary")
+sentences = [
+        "The cats are playing in the garden.",
+        "A cat chases a mouse.",
+        "Dogs and cats are natural enemies."
+    ]
+
+vectorizer = WordVectorizer()
+vectorizer.train_word2vec(sentences)
+
+word = "cats"
+vector = vectorizer.get_word_vector(word)
+print(f"Vector for '{word}':", vector) #no conver this giant vector in to one using a function or a matrix compression algorthim
 class dataframeToTensor:
     df=[]
     def __init__(self, dataframe):
