@@ -1,0 +1,5 @@
+numpy~=1.22.0
+torch~=2.5.1
+pandas~=1.5.3
+spacy~=3.5.0
+gensim~=4.3.3
