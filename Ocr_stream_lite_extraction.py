@@ -10,6 +10,9 @@ import re
 import time
 import streamlit as st
 from PIL import Image
+import Tensor_Factoriser as TFF2
+import spacy
+from gensim.models import Word2Vec
 pytesseract.pytesseract.tesseract_cmd = r"C:\Users\maxik\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
 class Ocr:
     def __init__(self, pdf_path, output_text_file):
@@ -66,11 +69,24 @@ class StreamliteGUI:
 
             # Print the extracted text to the console
             self.print_text(extracted_text)
+            self.dataToInformation(extracted_text)
 
     def print_text(self, text):
         print("Extracted Text from the PDF:")
         print(text)
-
+    def dataToInformation(self, text): #make it extract info
+        '''tokens, switch, mapping : either llm or clustors with vectorspace or both or 2nd tensor maping.
+        step1: break down text into sentences or simular sentences via creating simularity array and using split
+        step2: break down sentences into tokens and use Wordvec to get high dimentional vect for each word
+        alternative step 2: use llm to summerise (more computer power)
+        step3: create data frame of information, using word vectors to form simple phrases (or models of phrases)'''
+        selflamp = TFF2.WordVectorizer()
+        sentences = [[]]
+        sentence_list = text.split('.');
+        for i in sentence_list:
+            for j in i.split(' '):
+                sentences[sentence_list.index(i)].append(TFF2.WordVectorizer.get_word_vector(selflamp, j))
+        st.text_area("Vectorised sentences", sentences, height=300)
 
 # Run the Streamlit app
 if __name__ == "__main__":

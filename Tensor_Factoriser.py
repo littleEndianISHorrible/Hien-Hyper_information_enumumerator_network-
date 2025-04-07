@@ -4,6 +4,8 @@ import math
 import pandas as pd
 import spacy
 from gensim.models import Word2Vec
+from spellchecker import SpellChecker
+
 class TensorConverter:
     def __init__(self, a, b, c, d, theta):
         self.a = a
@@ -54,6 +56,7 @@ class TensorConverter:
 class WordVectorizer:
     def __init__(self, model_path=None):
         self.nlp = spacy.load('en_core_web_sm')
+        self.spell_checker = SpellChecker()
         if model_path:
             self.model = Word2Vec.load(model_path)
         else:
@@ -63,17 +66,32 @@ class WordVectorizer:
         doc = self.nlp(text)
         return [token.lemma_ for token in doc if token.is_alpha]
 
+    def correct_spelling(self, word):
+        corrected_word = self.spell_checker.correction(word)
+        if corrected_word != word:
+            print(f"Corrected '{word}' to '{corrected_word}'")
+        return corrected_word
+
     def train_word2vec(self, sentences, vector_size=100, window=5, min_count=1, epochs=10):
         tokenized_sentences = [self.lemmatize(sentence) for sentence in sentences]
         self.model = Word2Vec(sentences=tokenized_sentences, vector_size=vector_size, window=window, min_count=min_count, workers=4)
         self.model.train(tokenized_sentences, total_examples=len(tokenized_sentences), epochs=epochs)
 
     def get_word_vector(self, word):
+        word = self.correct_spelling(word)  # Correct spelling before processing
         lemma = self.lemmatize(word)[0]
-        if self.model and lemma in self.model.wv:
-            return self.model.wv[lemma]
+        if self.model:
+            if lemma in self.model.wv:
+                return self.model.wv[lemma]
+            else:
+                print(f"Word '{lemma}' not in vocabulary. Trying alternative approaches.")
+                # Alternative approach: Return the average vector of all known words in the vocabulary
+                avg_vector = np.mean([self.model.wv[key] for key in self.model.wv.key_to_index], axis=0)
+                print("Returning average vector as fallback.")
+                return avg_vector
         else:
-            raise ValueError(f"Word '{lemma}' not in vocabulary")
+            raise ValueError("Word2Vec model is not loaded. Please train or load a model.")
+
 sentences = [
         "The cats are playing in the garden.",
         "A cat chases a mouse.",
