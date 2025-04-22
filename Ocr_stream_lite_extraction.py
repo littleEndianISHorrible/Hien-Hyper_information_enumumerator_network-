@@ -81,11 +81,15 @@ class StreamliteGUI:
         alternative step 2: use llm to summerise (more computer power)
         step3: create data frame of information, using word vectors to form simple phrases (or models of phrases)'''
         selflamp = TFF2.WordVectorizer()
-        sentences = [[]]
-        sentence_list = text.split('.');
+        sentencesbuffer = []
+        sentences = []
+        sentence_list = text.split('.')
+        selflamp.train_word2vec(sentences=sentence_list)
         for i in sentence_list:
             for j in i.split(' '):
-                sentences[sentence_list.index(i)].append(TFF2.WordVectorizer.get_word_vector(selflamp, j))
+                print(j)
+                sentencesbuffer.append(selflamp.get_word_vector(word_filltered=j))
+            sentences.append(sentencesbuffer)
         st.text_area("Vectorised sentences", sentences, height=300)
 
 # Run the Streamlit app

@@ -5,7 +5,7 @@ import pandas as pd
 import spacy
 from gensim.models import Word2Vec
 from spellchecker import SpellChecker
-
+import matplotlib.pyplot as plt
 class TensorConverter:
     def __init__(self, a, b, c, d, theta):
         self.a = a
@@ -73,13 +73,16 @@ class WordVectorizer:
         return corrected_word
 
     def train_word2vec(self, sentences, vector_size=100, window=5, min_count=1, epochs=10):
-        tokenized_sentences = [self.lemmatize(sentence) for sentence in sentences]
+        tokenized_sentences = [self.lemmatize(text=sentence) for sentence in sentences]
         self.model = Word2Vec(sentences=tokenized_sentences, vector_size=vector_size, window=window, min_count=min_count, workers=4)
         self.model.train(tokenized_sentences, total_examples=len(tokenized_sentences), epochs=epochs)
 
-    def get_word_vector(self, word):
-        word = self.correct_spelling(word)  # Correct spelling before processing
-        lemma = self.lemmatize(word)[0]
+    def get_word_vector(self, word_filltered):
+        word = self.correct_spelling(word=word_filltered)  # Correct spelling before processing
+        try:
+            lemma = self.lemmatize(text=word)[0]
+        except:
+            lemma= None
         if self.model:
             if lemma in self.model.wv:
                 return self.model.wv[lemma]
@@ -101,9 +104,9 @@ sentences = [
 vectorizer = WordVectorizer()
 vectorizer.train_word2vec(sentences)
 
-word = "cats"
-vector = vectorizer.get_word_vector(word)
-print(f"Vector for '{word}':", vector) #no conver this giant vector in to one using a function or a matrix compression algorthim
+# word = "cats"
+# vector = vectorizer.get_word_vector(word)
+# print(f"Vector for '{word}':", vector) #no conver this giant vector in to one using a function or a matrix compression algorthim
 class dataframeToTensor:
     df=[]
     def __init__(self, dataframe):
@@ -115,21 +118,21 @@ class dataframeToTensor:
             df[i]
 
 # Example usage
-a, b, c, d = 26, 2, 32, 0.0001
-theta = math.pi / 4
-print(a)
-print(b)
-print(c)
-print(d)
-print(theta)
-converter = TensorConverter(a, b, c, d, theta)
-result_tensor = converter.create_tensor()
-print("Tensor:", result_tensor)
-
-# Convert tensor back to variables
-recovered_a, recovered_b, recovered_c, recovered_d, recovered_theta = TensorConverter.tensor_to_variables(result_tensor)
-print("Recovered variables:", recovered_a, recovered_b, recovered_c, recovered_d, recovered_theta)
-
+# a, b, c, d = 26, 2, 32, 0.0001
+# theta = math.pi / 4
+# print(a)
+# print(b)
+# print(c)
+# print(d)
+# print(theta)
+# converter = TensorConverter(a, b, c, d, theta)
+# result_tensor = converter.create_tensor()
+# print("Tensor:", result_tensor)
+#
+# # Convert tensor back to variables
+# recovered_a, recovered_b, recovered_c, recovered_d, recovered_theta = TensorConverter.tensor_to_variables(result_tensor)
+# print("Recovered variables:", recovered_a, recovered_b, recovered_c, recovered_d, recovered_theta)
+#
 
 
 
@@ -145,3 +148,28 @@ df = pd.DataFrame(data)
 all_columns = df.columns
 
 #a
+
+
+# Generate x values
+# x = np.linspace(-10, 10, 400)
+#
+# # Define the equation y = x
+# y = math.pow(math.sqrt(-1),x)
+#
+# # Create the plot
+# plt.figure(figsize=(8, 6))
+# plt.plot(x, y, label='y = x', color='blue')
+#
+# # Add title and labels
+# plt.title('Graph of y = x')
+# plt.xlabel('x')
+# plt.ylabel('y')
+#
+# # Add a grid
+# plt.grid(True)
+#
+# # Add a legend
+# plt.legend()
+#
+# # Show the plot
+# plt.show()
